@@ -16,13 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { GET, RequestHandler } from "fastify-decorators";
+import {
+  Controller,
+  FastifyInstanceToken,
+  GET,
+  Inject,
+} from "fastify-decorators";
+import { FastifyInstance } from "fastify";
 
-@GET({
-  url: "/hello",
-})
-export default class FirstController extends RequestHandler {
-  async handle() {
-    return { hello: "world" };
+@Controller({ route: "/" })
+export default class FirstController {
+  @Inject(FastifyInstanceToken) declare static instance: FastifyInstance;
+
+  @GET({ url: "/hello" })
+  async helloHandler() {
+    return FirstController.instance.httpErrors.badRequest("Hello world!");
   }
 }

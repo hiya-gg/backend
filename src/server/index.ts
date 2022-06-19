@@ -18,6 +18,7 @@
 
 import fastify from "fastify";
 import fastifySwagger from "@fastify/swagger";
+import fastifySensible from "@fastify/sensible";
 import { bootstrap } from "fastify-decorators";
 import * as process from "process";
 import config from "../config";
@@ -31,6 +32,7 @@ const app = fastify({
   },
 });
 
+// Configure plugins
 app.register(fastifySwagger, {
   routePrefix: "/swagger",
   exposeRoute: true,
@@ -43,6 +45,8 @@ app.register(fastifySwagger, {
   },
 });
 
+app.register(fastifySensible);
+
 // Configure route resolving
 app.register(bootstrap, {
   directory: new URL("controllers", import.meta.url),
@@ -50,7 +54,11 @@ app.register(bootstrap, {
 });
 
 // Set error handling
-app.setErrorHandler(async (error) => ({ success: false, error }));
+app.setErrorHandler(async (error) => ({
+  success: false,
+  error: error.message,
+  code: error.statusCode ?? 400,
+}));
 app.setNotFoundHandler(async (request) => ({
   success: false,
   error: `${request.method}:${request.url} Not Found`,

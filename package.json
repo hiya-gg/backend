@@ -15,6 +15,7 @@
     "lint:eslint": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\""
   },
   "dependencies": {
+    "@fastify/sensible": "^5.0.0",
     "@fastify/swagger": "^7.3.0",
     "fastify": "^4.0.3",
     "fastify-decorators": "^3.12.0",
