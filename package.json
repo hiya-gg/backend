@@ -1,0 +1,43 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Fastify backend for Hiya.gg - powering connections, data, and authentication",
+  "author": "Zerite Development",
+  "license": "GPL-3.0",
+  "scripts": {
+    "start": "npm run --silent build && node ./dist/index.js",
+    "build": "tsc",
+    "dev": "ts-node ./src/index.ts",
+    "dev:watch": "nodemon",
+    "lint": "npm run --silent lint:prettier && npm run --silent lint:eslint",
+    "lint:prettier": "prettier -w \"src/**/*.{js,jsx,ts,tsx}\" -u",
+    "lint:eslint": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\""
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "eslint": "^8.18.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jsx-a11y": "^6.5.1",
+    "eslint-plugin-prettier": "^4.0.0",
+    "husky": "^8.0.1",
+    "lint-staged": "^13.0.2",
+    "nodemon": "^2.0.16",
+    "prettier": "^2.7.1",
+    "ts-node": "^10.8.1",
+    "typescript": "^4.7.4"
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,ts,tsx}": "npm run lint"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "dist",
+      "node_modules"
+    ],
+    "ext": "*",
+    "verbose": true,
+    "exec": "npm run --silent dev"
+  }
+}
