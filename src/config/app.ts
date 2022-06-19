@@ -16,7 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import server from "./server";
+const optInt = (value: string | undefined) => {
+  if (!value) return undefined;
+  return parseInt(value, 10);
+};
 
-// Start the server
-await server.start();
+export default {
+  fastify: {
+    host: process.env.FASTIFY_HOST || "0.0.0.0",
+    port: optInt(process.env.FASTIFY_PORT) || 3000,
+  },
+};

@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import server from "./server";
+import app from "./app";
 
-// Start the server
-await server.start();
+export default {
+  app,
+};

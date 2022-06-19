@@ -4,20 +4,33 @@
   "description": "Fastify backend for Hiya.gg - powering connections, data, and authentication",
   "author": "Zerite Development",
   "license": "GPL-3.0",
+  "type": "module",
   "scripts": {
     "start": "npm run --silent build && node ./dist/index.js",
     "build": "tsc",
-    "dev": "ts-node ./src/index.ts",
-    "dev:watch": "nodemon",
+    "dev": "ts-node --esm --experimentalSpecifierResolution=node src/index.ts",
+    "dev:watch": "nodemon src/index.ts",
     "lint": "npm run --silent lint:prettier && npm run --silent lint:eslint",
     "lint:prettier": "prettier -w \"src/**/*.{js,jsx,ts,tsx}\" -u",
     "lint:eslint": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\""
   },
+  "dependencies": {
+    "@fastify/swagger": "^7.3.0",
+    "fastify": "^4.0.3",
+    "fastify-decorators": "^3.12.0",
+    "pino": "^8.0.0",
+    "pino-pretty": "^8.0.0"
+  },
   "devDependencies": {
+    "@tsconfig/node16": "^1.0.3",
     "@types/node": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.28.0",
+    "@typescript-eslint/parser": "^5.28.0",
     "eslint": "^8.18.0",
     "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-config-prettier": "^8.5.0",
+    "eslint-import-resolver-typescript": "^2.7.1",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-prettier": "^4.0.0",
@@ -33,11 +46,13 @@
   },
   "nodemonConfig": {
     "ignore": [
-      "dist",
+      "build",
       "node_modules"
     ],
     "ext": "*",
     "verbose": true,
-    "exec": "npm run --silent dev"
+    "execMap": {
+      "ts": "ts-node --esm --experimentalSpecifierResolution=node"
+    }
   }
 }

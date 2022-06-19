@@ -16,7 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import server from "./server";
+import { GET, RequestHandler } from "fastify-decorators";
 
-// Start the server
-await server.start();
+@GET({
+  url: "/hello",
+})
+export default class FirstController extends RequestHandler {
+  async handle() {
+    return { hello: "world" };
+  }
+}

@@ -1,11 +1,12 @@
 {
+  "extends": "@tsconfig/node16/tsconfig.json",
   "compilerOptions": {
-    "module": "Node16",
-    "target": "ES2022",
-    "sourceMap": false,
-    "outDir": "./dist"
+    "declaration": true,
+    "outDir": "./build",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "experimentalDecorators": true
   },
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
 }
