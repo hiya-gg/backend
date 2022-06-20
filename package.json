@@ -6,21 +6,24 @@
   "license": "GPL-3.0",
   "type": "module",
   "scripts": {
-    "start": "npm run --silent build && node ./dist/index.js",
+    "start": "pnpm run --silent build && node ./dist/index.js",
     "build": "tsc",
     "dev": "ts-node --esm --experimentalSpecifierResolution=node src/index.ts",
     "dev:watch": "nodemon src/index.ts",
-    "lint": "npm run --silent lint:prettier && npm run --silent lint:eslint",
+    "lint": "pnpm run --silent lint:prettier && npm run --silent lint:eslint",
     "lint:prettier": "prettier -w \"src/**/*.{js,jsx,ts,tsx}\" -u",
-    "lint:eslint": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\""
+    "lint:eslint": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\"",
+    "prisma:generate": "pnpm prisma generate"
   },
   "dependencies": {
     "@fastify/sensible": "^5.0.0",
     "@fastify/swagger": "^7.3.0",
+    "@prisma/client": "^3.15.2",
     "fastify": "^4.0.3",
     "fastify-decorators": "^3.12.0",
     "pino": "^8.0.0",
-    "pino-pretty": "^8.0.0"
+    "pino-pretty": "^8.0.0",
+    "prisma": "^3.15.2"
   },
   "devDependencies": {
     "@tsconfig/node16": "^1.0.3",
@@ -48,7 +51,8 @@
   "nodemonConfig": {
     "ignore": [
       "build",
-      "node_modules"
+      "node_modules",
+      "docker"
     ],
     "ext": "*",
     "verbose": true,

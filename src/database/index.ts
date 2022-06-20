@@ -16,18 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import server from "./server";
-import { connect, disconnect } from "./database";
+import { PrismaClient } from "@prisma/client";
 
-const start = async () => {
-  await connect();
-  await server.start();
-};
+const prisma = new PrismaClient();
 
-// Start the server
-start()
-  .catch((e) => {
-    // Rethrow the error
-    throw e;
-  })
-  .finally(() => disconnect());
+const connect = async () => prisma.$connect();
+const disconnect = async () => prisma.$disconnect();
+
+export { prisma, connect, disconnect };
