@@ -20,6 +20,8 @@
     "@fastify/swagger": "^7.3.0",
     "@prisma/client": "^3.15.2",
     "@sinclair/typebox": "^0.23.5",
+    "argon2": "^0.28.5",
+    "email-validator": "^2.0.4",
     "fastify": "^4.0.3",
     "fastify-decorators": "^3.12.0",
     "pino": "^8.0.0",
@@ -55,7 +57,8 @@
     "ignore": [
       "build",
       "node_modules",
-      "docker"
+      "docker",
+      "http"
     ],
     "ext": "*",
     "verbose": true,

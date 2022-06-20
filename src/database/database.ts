@@ -16,5 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./database";
-export * from "./accounts";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
+
+const connect = async () => prisma.$connect();
+const disconnect = async () => prisma.$disconnect();
+
+export { prisma, connect, disconnect };

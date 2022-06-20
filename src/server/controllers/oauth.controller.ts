@@ -24,7 +24,7 @@ import {
 } from "fastify-decorators";
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { Static, Type } from "@sinclair/typebox";
-import { createClient, services } from "../../linking/services";
+import { createClient, services } from "../../manager/linking";
 
 const OAuthParams = Type.Object({
   id: Type.String(),
@@ -93,9 +93,8 @@ export default class OauthController {
       return OauthController.instance.httpErrors.notFound();
     }
 
-    const client = createClient(service);
-
     try {
+      const client = createClient(service);
       const token = await client.getToken({
         code: request.query.code,
         redirect_uri: `${request.protocol}://${request.hostname}/oauth/${id}/callback`,
