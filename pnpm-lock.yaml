@@ -6,11 +6,13 @@ specifiers:
   '@prisma/client': ^3.15.2
   '@sinclair/typebox': ^0.23.5
   '@tsconfig/node16': ^1.0.3
+  '@types/centra': ^2.2.0
   '@types/node': ^18.0.0
   '@types/simple-oauth2': ^4.1.1
   '@typescript-eslint/eslint-plugin': ^5.28.0
   '@typescript-eslint/parser': ^5.28.0
   argon2: ^0.28.5
+  centra: ^2.5.0
   email-validator: ^2.0.4
   eslint: ^8.18.0
   eslint-config-airbnb-base: ^15.0.0
@@ -39,6 +41,7 @@ dependencies:
   '@prisma/client': 3.15.2_prisma@3.15.2
   '@sinclair/typebox': 0.23.5
   argon2: 0.28.5
+  centra: 2.5.0
   email-validator: 2.0.4
   fastify: 4.0.3
   fastify-decorators: 3.12.0_btguaagkywim42wvqnkxoid7am
@@ -49,6 +52,7 @@ dependencies:
 
 devDependencies:
   '@tsconfig/node16': 1.0.3
+  '@types/centra': 2.2.0
   '@types/node': 18.0.0
   '@types/simple-oauth2': 4.1.1
   '@typescript-eslint/eslint-plugin': 5.28.0_py5roj3ykd3sga4gtxlmfvv4pa
@@ -335,6 +339,12 @@ packages:
 
   /@tsconfig/node16/1.0.3:
     resolution: {integrity: sha512-yOlFc+7UtL/89t2ZhjPvvB/DeAr3r+Dq58IgzsFkOAvVC6NMJXmCGjbptdXdR9qsX7pKcTL+s87FtYREi2dEEQ==}
+    dev: true
+
+  /@types/centra/2.2.0:
+    resolution: {integrity: sha512-TUpM1QoIgXa2VL1LnWbTgde39+rRnsOtvb0v8ZrX8t51g8K1Wwu4HAEXcBg5a56GV5Vm/KazyE5+g4AW8YbKNg==}
+    dependencies:
+      '@types/node': 18.0.0
     dev: true
 
   /@types/json-schema/7.0.11:
@@ -787,6 +797,10 @@ packages:
     resolution: {integrity: sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==}
     engines: {node: '>=10'}
     dev: true
+
+  /centra/2.5.0:
+    resolution: {integrity: sha512-CnSF1HD8vOOgNbE4P2fZEhdhfAohvpcF3DSdSvEcSHDAZvr+Xfw73isT8SXJJc3VMBqSwjXhr29/ikHUgFcypg==}
+    dev: false
 
   /chalk/2.4.2:
     resolution: {integrity: sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==}

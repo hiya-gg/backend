@@ -13,7 +13,8 @@
     "lint": "pnpm run --silent lint:prettier && npm run --silent lint:eslint",
     "lint:prettier": "prettier -w \"src/**/*.{js,jsx,ts,tsx}\" -u",
     "lint:eslint": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\"",
-    "prisma:generate": "pnpm prisma generate"
+    "prisma:generate": "pnpm prisma generate",
+    "prisma:migrate": "pnpm prisma migrate dev"
   },
   "dependencies": {
     "@fastify/sensible": "^5.0.0",
@@ -21,6 +22,7 @@
     "@prisma/client": "^3.15.2",
     "@sinclair/typebox": "^0.23.5",
     "argon2": "^0.28.5",
+    "centra": "^2.5.0",
     "email-validator": "^2.0.4",
     "fastify": "^4.0.3",
     "fastify-decorators": "^3.12.0",
@@ -31,6 +33,7 @@
   },
   "devDependencies": {
     "@tsconfig/node16": "^1.0.3",
+    "@types/centra": "^2.2.0",
     "@types/node": "^18.0.0",
     "@types/simple-oauth2": "^4.1.1",
     "@typescript-eslint/eslint-plugin": "^5.28.0",

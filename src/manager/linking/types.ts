@@ -16,13 +16,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { AuthorizationCode } from "simple-oauth2";
-import { ServiceMetadata } from "./types";
-import DISCORD_SERVICE from "./service/discord";
+import { ModuleOptions } from "simple-oauth2";
+import { Prisma } from "@prisma/client";
 
-const services: ServiceMetadata[] = [DISCORD_SERVICE];
+interface ServiceMetadata {
+  name: string;
+  scopes: string[];
+  config: ModuleOptions;
+  connectionBuilder: (
+    token: string,
+    user: number
+  ) => Promise<Prisma.ConnectionCreateInput>;
+}
 
-const createClient = (service: ServiceMetadata) =>
-  new AuthorizationCode(service.config);
+interface ClientOptions {
+  id: string;
+  secret: string;
+  secretParamName?: string | undefined;
+  idParamName?: "client_id" | undefined;
+}
 
-export { DISCORD_SERVICE, services, createClient };
+const getClientOptions: (name: string) => ClientOptions = (name: string) => ({
+  id: process.env[`${name.toUpperCase()}_CLIENT_ID`] || "",
+  secret: process.env[`${name.toUpperCase()}_CLIENT_SECRET`] || "",
+  idParamName: "client_id",
+  secretParamName: "client_secret",
+});
+
+export { ServiceMetadata, ClientOptions, getClientOptions };

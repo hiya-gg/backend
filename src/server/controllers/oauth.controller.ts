@@ -104,9 +104,9 @@ export default class OauthController {
         return OauthController.instance.httpErrors.badRequest();
       }
 
-      return token.token;
+      return await service.connectionBuilder(token.token.access_token, 1);
     } catch (e) {
-      return OauthController.instance.httpErrors.internalServerError();
+      return OauthController.instance.httpErrors.badRequest("Invalid code");
     }
   }
 }
