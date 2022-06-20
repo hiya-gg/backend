@@ -30,6 +30,15 @@ const app = fastify({
       target: "pino-pretty",
     },
   },
+
+  // Fix for TypeBox, see:
+  // https://github.com/fastify/fastify/issues/3421#issuecomment-962469639
+  ajv: {
+    customOptions: {
+      strict: "log",
+      keywords: ["kind", "modifier"],
+    },
+  },
 });
 
 // Configure plugins

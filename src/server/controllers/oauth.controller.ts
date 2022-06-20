@@ -23,18 +23,34 @@ import {
   Inject,
 } from "fastify-decorators";
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { Static, Type } from "@sinclair/typebox";
 import { createClient, services } from "../../linking/services";
+
+const OAuthParams = Type.Object({
+  id: Type.String(),
+});
+type OAuthParamsType = Static<typeof OAuthParams>;
+
+const OAuthCodeQuery = Type.Object({
+  code: Type.String(),
+});
+type OAuthCodeQueryType = Static<typeof OAuthCodeQuery>;
 
 @Controller({ route: "/oauth" })
 export default class OauthController {
   @Inject(FastifyInstanceToken) declare static instance: FastifyInstance;
 
-  @GET("/:id/authorize")
+  @GET({
+    url: "/:id/authorize",
+    options: {
+      schema: {
+        params: OAuthParams,
+      },
+    },
+  })
   async authorizeHandler(
     request: FastifyRequest<{
-      Params: {
-        id: string;
-      };
+      Params: OAuthParamsType;
     }>,
     reply: FastifyReply
   ) {
@@ -55,16 +71,19 @@ export default class OauthController {
     return reply.redirect(url);
   }
 
-  // TODO: Schema validation
-  @GET("/:id/callback")
+  @GET({
+    url: "/:id/callback",
+    options: {
+      schema: {
+        params: OAuthParams,
+        querystring: OAuthCodeQuery,
+      },
+    },
+  })
   async callbackHandler(
     request: FastifyRequest<{
-      Params: {
-        id: string;
-      };
-      Querystring: {
-        code: string;
-      };
+      Params: OAuthParamsType;
+      Querystring: OAuthCodeQueryType;
     }>
   ) {
     const id = request.params.id.toLowerCase();
