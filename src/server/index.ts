@@ -59,10 +59,13 @@ app.setErrorHandler(async (error) => ({
   error: error.message,
   code: error.statusCode ?? 400,
 }));
-app.setNotFoundHandler(async (request) => ({
-  success: false,
-  error: `${request.method}:${request.url} Not Found`,
-}));
+app.setNotFoundHandler(async (request) => {
+  const url = new URL(request.url, `${request.protocol}://${request.hostname}`);
+  return {
+    success: false,
+    error: `${request.method}:${url.pathname} Not Found`,
+  };
+});
 
 export default {
   start: async () => {
