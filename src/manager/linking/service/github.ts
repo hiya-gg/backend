@@ -46,7 +46,7 @@ const GITHUB_SERVICE: ServiceMetadata = {
   connectionBuilder: async (token: string) => {
     const user: GitHubUser = await centra("https://api.github.com/user")
       .header("Authorization", `token ${token}`)
-      .header("User-Agent", "HiyaGG Backend/1.0 (https://hiyagg.com)")
+      .header("User-Agent", "HiyaGG Backend/1.0 (https://hiya.gg)")
       .send()
       .then((res) => res.json());
 
