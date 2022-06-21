@@ -1,11 +1,12 @@
 {
-  "name": "backend",
+  "name": "hiyagg-backend",
   "version": "1.0.0",
   "description": "Fastify backend for Hiya.gg - powering connections, data, and authentication",
   "author": "Zerite Development",
-  "license": "GPL-3.0",
+  "license": "AGPL-3.0",
   "type": "module",
   "scripts": {
+    "prepare": "husky install",
     "start": "pnpm run --silent build && node ./dist/index.js",
     "build": "tsc",
     "dev": "ts-node --esm --experimentalSpecifierResolution=node src/index.ts",
