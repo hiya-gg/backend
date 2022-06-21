@@ -109,20 +109,26 @@ export default class OauthController {
       }
 
       const connection = await service.connectionBuilder(
-        token.token.access_token,
-        jwt.user.id
+        token.token.access_token
       );
 
       await prisma.connection.upsert({
-        create: connection,
+        create: {
+          user: {
+            connect: {
+              id: jwt.user.id,
+            },
+          },
+          type: service.name,
+          ...connection,
+        },
         update: connection,
         where: {
           platformId: connection.platformId,
         },
       });
 
-      const { user, ...connectionWithoutUser } = connection;
-      return connectionWithoutUser;
+      return connection;
     } catch (e) {
       return OauthController.instance.httpErrors.badRequest("Invalid code");
     }

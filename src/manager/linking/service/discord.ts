@@ -36,7 +36,7 @@ const DISCORD_SERVICE: ServiceMetadata = {
       tokenPath: "/api/oauth2/token",
     },
   },
-  connectionBuilder: async (token: string, user: number) => {
+  connectionBuilder: async (token: string) => {
     const { id, username, discriminator }: DiscordUser = await centra(
       "https://discord.com/api/v10/users/@me"
     )
@@ -45,11 +45,6 @@ const DISCORD_SERVICE: ServiceMetadata = {
       .then((res) => res.json());
 
     return {
-      user: {
-        connect: {
-          id: user,
-        },
-      },
       username: `${username}#${discriminator}`,
       platformId: id,
       metadata: {

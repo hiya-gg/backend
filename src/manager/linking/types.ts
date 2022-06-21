@@ -23,10 +23,7 @@ interface ServiceMetadata {
   name: string;
   scopes: string[];
   config: ModuleOptions;
-  connectionBuilder: (
-    token: string,
-    user: number
-  ) => Promise<Prisma.ConnectionCreateInput>;
+  connectionBuilder: (token: string) => Promise<ConnectionResult>;
 }
 
 interface ClientOptions {
@@ -43,4 +40,10 @@ const getClientOptions: (name: string) => ClientOptions = (name: string) => ({
   secretParamName: "client_secret",
 });
 
-export { ServiceMetadata, ClientOptions, getClientOptions };
+interface ConnectionResult {
+  platformId: string;
+  username: string;
+  metadata: Prisma.InputJsonValue;
+}
+
+export { ServiceMetadata, ClientOptions, getClientOptions, ConnectionResult };

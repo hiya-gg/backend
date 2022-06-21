@@ -27,6 +27,7 @@ model Connection {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  type        String
   platformId  String   @unique
   username    String   @unique
   metadata    Json
