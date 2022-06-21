@@ -19,8 +19,9 @@
 import { AuthorizationCode } from "simple-oauth2";
 import { ServiceMetadata } from "./types";
 import DISCORD_SERVICE from "./service/discord";
+import GITHUB_SERVICE from "./service/github";
 
-const services: ServiceMetadata[] = [DISCORD_SERVICE];
+const services: ServiceMetadata[] = [DISCORD_SERVICE, GITHUB_SERVICE];
 
 const createClient = (service: ServiceMetadata) =>
   new AuthorizationCode(service.config);

@@ -97,9 +97,10 @@ export default class OauthController {
       return OauthController.instance.httpErrors.notFound();
     }
 
+    let token;
     try {
       const client = createClient(service);
-      const token = await client.getToken({
+      token = await client.getToken({
         code: request.query.code,
         redirect_uri: `${request.protocol}://${request.hostname}/oauth/${id}/callback`,
       });
@@ -107,7 +108,11 @@ export default class OauthController {
       if (!token || token.expired()) {
         return OauthController.instance.httpErrors.badRequest();
       }
+    } catch (e) {
+      return OauthController.instance.httpErrors.badRequest("Invalid code");
+    }
 
+    try {
       const connection = await service.connectionBuilder(
         token.token.access_token
       );
@@ -130,7 +135,8 @@ export default class OauthController {
 
       return connection;
     } catch (e) {
-      return OauthController.instance.httpErrors.badRequest("Invalid code");
+      OauthController.instance.log.error(e);
+      return OauthController.instance.httpErrors.internalServerError();
     }
   }
 }
