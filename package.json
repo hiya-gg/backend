@@ -17,6 +17,8 @@
     "prisma:migrate": "pnpm prisma migrate dev"
   },
   "dependencies": {
+    "@fastify/cookie": "^7.0.0",
+    "@fastify/jwt": "^6.1.0",
     "@fastify/sensible": "^5.0.0",
     "@fastify/swagger": "^7.3.0",
     "@prisma/client": "^3.15.2",

@@ -1,0 +1,8 @@
+POST {{host}}/accounts/login
+Content-Type: application/json
+
+{
+  "email": "hello@koding.dev",
+  "username": "test",
+  "password": "test"
+}

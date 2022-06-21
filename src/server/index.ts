@@ -21,6 +21,8 @@ import fastifySwagger from "@fastify/swagger";
 import fastifySensible from "@fastify/sensible";
 import { bootstrap } from "fastify-decorators";
 import * as process from "process";
+import fastifyJwt from "@fastify/jwt";
+import fastifyCookie from "@fastify/cookie";
 import config from "../config";
 
 // Configure fastify
@@ -55,6 +57,25 @@ app.register(fastifySwagger, {
 });
 
 app.register(fastifySensible);
+
+// Configure authentication
+app.register(fastifyJwt, {
+  secret: config.app.jwt.secret,
+  sign: {
+    iss: "api.hiya.gg",
+  },
+  verify: {
+    allowedIss: ["api.hiya.gg"],
+  },
+  cookie: {
+    cookieName: "token",
+    signed: false,
+  },
+});
+
+app.register(fastifyCookie, {
+  secret: config.app.jwt.secret,
+});
 
 // Configure route resolving
 app.register(bootstrap, {

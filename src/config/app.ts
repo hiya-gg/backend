@@ -26,4 +26,7 @@ export default {
     host: process.env.FASTIFY_HOST || "0.0.0.0",
     port: optInt(process.env.FASTIFY_PORT) || 3000,
   },
+  jwt: {
+    secret: process.env.JWT_SECRET || "secret",
+  },
 };

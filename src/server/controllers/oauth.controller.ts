@@ -25,6 +25,8 @@ import {
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { Static, Type } from "@sinclair/typebox";
 import { createClient, services } from "../../manager/linking";
+import { TokenPayload } from "../../manager/auth/types";
+import { prisma } from "../../database";
 
 const OAuthParams = Type.Object({
   id: Type.String(),
@@ -86,6 +88,8 @@ export default class OauthController {
       Querystring: OAuthCodeQueryType;
     }>
   ) {
+    const jwt = await request.jwtVerify<TokenPayload>();
+
     const id = request.params.id.toLowerCase();
     const service = services.find((s) => s.name.toLowerCase() === id);
 
@@ -104,7 +108,21 @@ export default class OauthController {
         return OauthController.instance.httpErrors.badRequest();
       }
 
-      return await service.connectionBuilder(token.token.access_token, 1);
+      const connection = await service.connectionBuilder(
+        token.token.access_token,
+        jwt.user.id
+      );
+
+      await prisma.connection.upsert({
+        create: connection,
+        update: connection,
+        where: {
+          platformId: connection.platformId,
+        },
+      });
+
+      const { user, ...connectionWithoutUser } = connection;
+      return connectionWithoutUser;
     } catch (e) {
       return OauthController.instance.httpErrors.badRequest("Invalid code");
     }
