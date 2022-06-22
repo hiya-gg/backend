@@ -5,7 +5,11 @@
     "outDir": "./build",
     "module": "ESNext",
     "moduleResolution": "node",
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "typeRoots": [
+      "src/types",
+      "node_modules/@types"
+    ],
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]

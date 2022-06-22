@@ -16,17 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-  Controller,
-  FastifyInstanceToken,
-  GET,
-  Inject,
-} from "fastify-decorators";
-import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { Controller, GET } from "fastify-decorators";
+import { FastifyReply, FastifyRequest } from "fastify";
 import { Static, Type } from "@sinclair/typebox";
 import { createClient, services } from "../../manager/linking";
-import { TokenPayload } from "../../manager/auth/types";
+import { verifyScopes } from "../../manager/auth";
 import { prisma } from "../../database";
+import { fastify } from "../index";
 
 const OAuthParams = Type.Object({
   id: Type.String(),
@@ -40,8 +36,6 @@ type OAuthCodeQueryType = Static<typeof OAuthCodeQuery>;
 
 @Controller({ route: "/oauth" })
 export default class OauthController {
-  @Inject(FastifyInstanceToken) declare static instance: FastifyInstance;
-
   @GET({
     url: "/:id/authorize",
     options: {
@@ -60,7 +54,7 @@ export default class OauthController {
     const service = services.find((s) => s.name.toLowerCase() === id);
 
     if (!service) {
-      return OauthController.instance.httpErrors.notFound();
+      return fastify.httpErrors.notFound();
     }
 
     // TODO: State
@@ -80,6 +74,7 @@ export default class OauthController {
         params: OAuthParams,
         querystring: OAuthCodeQuery,
       },
+      preHandler: fastify.auth([verifyScopes(["connections.link"])]),
     },
   })
   async callbackHandler(
@@ -88,13 +83,13 @@ export default class OauthController {
       Querystring: OAuthCodeQueryType;
     }>
   ) {
-    const jwt = await request.jwtVerify<TokenPayload>();
+    const session = await request.getSession();
 
     const id = request.params.id.toLowerCase();
     const service = services.find((s) => s.name.toLowerCase() === id);
 
     if (!service) {
-      return OauthController.instance.httpErrors.notFound();
+      return fastify.httpErrors.notFound();
     }
 
     let token;
@@ -106,10 +101,10 @@ export default class OauthController {
       });
 
       if (!token || token.expired()) {
-        return OauthController.instance.httpErrors.badRequest();
+        return fastify.httpErrors.badRequest();
       }
     } catch (e) {
-      return OauthController.instance.httpErrors.badRequest("Invalid code");
+      return fastify.httpErrors.badRequest("Invalid code");
     }
 
     try {
@@ -121,7 +116,7 @@ export default class OauthController {
         create: {
           user: {
             connect: {
-              id: jwt.user.id,
+              id: session.access?.user.id,
             },
           },
           type: service.name,
@@ -135,8 +130,8 @@ export default class OauthController {
 
       return connection;
     } catch (e) {
-      OauthController.instance.log.error(e);
-      return OauthController.instance.httpErrors.internalServerError();
+      fastify.log.error(e);
+      return fastify.httpErrors.internalServerError();
     }
   }
 }

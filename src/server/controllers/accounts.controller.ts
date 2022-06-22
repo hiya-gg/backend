@@ -16,17 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-  Controller,
-  FastifyInstanceToken,
-  Inject,
-  POST,
-} from "fastify-decorators";
-import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { Controller, POST } from "fastify-decorators";
+import { FastifyReply, FastifyRequest } from "fastify";
 import { Static, Type } from "@sinclair/typebox";
-import argon2 from "argon2";
-import { createUser, prisma } from "../../database";
-import { TokenPayload } from "../../manager/auth/types";
+import { createUser, login } from "../../manager/auth";
+import { fastify } from "../index";
 
 const CreateUserBody = Type.Object({
   email: Type.String(),
@@ -44,8 +38,6 @@ type LoginBodyType = Static<typeof LoginBody>;
 
 @Controller({ route: "/accounts" })
 export default class AccountsController {
-  @Inject(FastifyInstanceToken) declare static instance: FastifyInstance;
-
   @POST({
     url: "/create",
   })
@@ -71,60 +63,18 @@ export default class AccountsController {
     const { email, username, password } = request.body;
 
     if (!email && !username) {
-      return AccountsController.instance.httpErrors.badRequest(
+      return fastify.httpErrors.badRequest(
         "Must provide either email or username"
       );
     }
 
-    const user = await prisma.user.findFirst({
-      where: {
-        OR: {
-          email: {
-            equals: email,
-            mode: "insensitive",
-          },
-          username: {
-            equals: username,
-            mode: "insensitive",
-          },
-        },
-      },
-    });
-
-    if (!user) {
-      return AccountsController.instance.httpErrors.badRequest(
-        "Invalid credentials"
-      );
-    }
-
-    if (!(await argon2.verify(user.password, password))) {
-      return AccountsController.instance.httpErrors.badRequest(
-        "Invalid credentials"
-      );
-    }
-
-    // TODO: Refresh token
-    const token = await reply.jwtSign(
-      {
-        user: {
-          id: user.id,
-          email: user.email,
-          username: user.username,
-        },
-      } as TokenPayload,
-      {
-        sign: {
-          expiresIn: "1d",
-        },
-      }
-    );
+    const token = await login((email || username) as string, password);
 
     return reply
-      .setCookie("token", token, {
-        path: "/",
+      .setCookie("token", JSON.stringify(token), {
         httpOnly: true,
       })
       .code(200)
-      .send({ token });
+      .send(token);
   }
 }

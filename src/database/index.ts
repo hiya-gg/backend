@@ -17,4 +17,3 @@
  */
 
 export * from "./database";
-export * from "./accounts";

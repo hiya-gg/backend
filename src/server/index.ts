@@ -16,17 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import fastify from "fastify";
+import Fastify from "fastify";
 import fastifySwagger from "@fastify/swagger";
 import fastifySensible from "@fastify/sensible";
 import { bootstrap } from "fastify-decorators";
 import * as process from "process";
 import fastifyJwt from "@fastify/jwt";
 import fastifyCookie from "@fastify/cookie";
+import fastifyAuth from "@fastify/auth";
 import config from "../config";
+import { hiyaFastifyAuth, SIGN_OPTIONS, VERIFY_OPTIONS } from "../manager/auth";
 
 // Configure fastify
-const app = fastify({
+const fastify = Fastify({
   logger: {
     transport: {
       target: "pino-pretty",
@@ -44,7 +46,7 @@ const app = fastify({
 });
 
 // Configure plugins
-app.register(fastifySwagger, {
+fastify.register(fastifySwagger, {
   routePrefix: "/swagger",
   exposeRoute: true,
   swagger: {
@@ -56,40 +58,40 @@ app.register(fastifySwagger, {
   },
 });
 
-app.register(fastifySensible);
+fastify.register(fastifySensible);
+fastify.register(fastifyAuth);
 
 // Configure authentication
-app.register(fastifyJwt, {
+fastify.register(fastifyJwt, {
   secret: config.app.jwt.secret,
-  sign: {
-    iss: "api.hiya.gg",
-  },
-  verify: {
-    allowedIss: ["api.hiya.gg"],
-  },
+  sign: SIGN_OPTIONS,
+  verify: VERIFY_OPTIONS,
   cookie: {
     cookieName: "token",
     signed: false,
   },
 });
 
-app.register(fastifyCookie, {
+fastify.register(fastifyCookie, {
   secret: config.app.jwt.secret,
 });
 
 // Configure route resolving
-app.register(bootstrap, {
+fastify.register(bootstrap, {
   directory: new URL("controllers", import.meta.url),
   mask: /\.controller\./,
 });
 
+// Register custom plugins
+fastify.register(hiyaFastifyAuth);
+
 // Set error handling
-app.setErrorHandler(async (error) => ({
+fastify.setErrorHandler(async (error) => ({
   success: false,
   error: error.message,
   code: error.statusCode ?? 400,
 }));
-app.setNotFoundHandler(async (request) => {
+fastify.setNotFoundHandler(async (request) => {
   const url = new URL(request.url, `${request.protocol}://${request.hostname}`);
   return {
     success: false,
@@ -97,16 +99,16 @@ app.setNotFoundHandler(async (request) => {
   };
 });
 
-export default {
-  start: async () => {
-    try {
-      await app.listen({
-        host: config.app.fastify.host,
-        port: config.app.fastify.port,
-      });
-    } catch (err) {
-      app.log.error(err);
-      process.exit(1);
-    }
-  },
+const start = async () => {
+  try {
+    await fastify.listen({
+      host: config.app.fastify.host,
+      port: config.app.fastify.port,
+    });
+  } catch (err) {
+    fastify.log.error(err);
+    process.exit(1);
+  }
 };
+
+export { start, fastify };

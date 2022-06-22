@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import server from "./server";
+import { start as startServer } from "./server";
 import { connect, disconnect } from "./database";
 
 const start = async () => {
   await connect();
-  await server.start();
+  await startServer();
 };
 
 // Start the server
