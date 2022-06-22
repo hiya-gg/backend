@@ -1,10 +1,23 @@
 interface TokenPayload {
-  user: {
-    id: number;
-    email: string;
-    username: string;
+  access?: {
+    user: {
+      id: number;
+      email: string;
+      username: string;
+    };
+    scopes?: string[];
   };
+  refresh?: {
+    access: string;
+  };
+  type: "access" | "refresh";
 }
 
-// eslint-disable-next-line import/prefer-default-export
-export { TokenPayload };
+interface TokenResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  type: "Bearer";
+}
+
+export { TokenPayload, TokenResponse };
