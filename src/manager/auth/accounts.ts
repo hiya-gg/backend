@@ -26,6 +26,7 @@ import {
   jwtDecode,
   validateRefreshToken,
 } from "./tokens";
+import { TokenResponse } from "./types";
 
 const createUser = async (
   email: string,
@@ -57,7 +58,10 @@ const createUser = async (
   }
 };
 
-const login = async (usernameOrEmail: string, password: string) => {
+const login = async (
+  usernameOrEmail: string,
+  password: string
+): Promise<TokenResponse> => {
   const user = await prisma.user.findFirst({
     where: {
       OR: [
@@ -96,7 +100,10 @@ const login = async (usernameOrEmail: string, password: string) => {
   };
 };
 
-const refresh = async (accessToken: string, refreshToken: string) => {
+const refresh = async (
+  accessToken: string,
+  refreshToken: string
+): Promise<TokenResponse> => {
   if (!validateRefreshToken(accessToken, refreshToken)) {
     throw new Error("Invalid refresh token");
   }

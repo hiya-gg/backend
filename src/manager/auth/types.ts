@@ -13,5 +13,11 @@ interface TokenPayload {
   type: "access" | "refresh";
 }
 
-// eslint-disable-next-line import/prefer-default-export
-export { TokenPayload };
+interface TokenResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  type: "Bearer";
+}
+
+export { TokenPayload, TokenResponse };
