@@ -20,12 +20,7 @@ import argon2 from "argon2";
 import { Prisma } from "@prisma/client";
 import * as emailValidator from "email-validator";
 import { prisma } from "../../database";
-import {
-  createAccessToken,
-  createRefreshToken,
-  jwtDecode,
-  validateRefreshToken,
-} from "./tokens";
+import { createTokenPair, jwtDecode, validateRefreshToken } from "./tokens";
 import { TokenResponse } from "./types";
 
 const createUser = async (
@@ -89,15 +84,7 @@ const login = async (
     throw new Error("Invalid credentials");
   }
 
-  const accessToken = createAccessToken(user, ["*"]);
-  const refreshToken = createRefreshToken(user, accessToken);
-
-  return {
-    accessToken,
-    refreshToken,
-    expiresIn: 24 * 60 * 60,
-    type: "Bearer",
-  };
+  return createTokenPair(user, ["*"]);
 };
 
 const refresh = async (
@@ -124,15 +111,7 @@ const refresh = async (
   }
 
   // TODO: Invalidate access token & refresh token
-  const newAccessToken = createAccessToken(user, ["*"]);
-  const newRefreshToken = createRefreshToken(user, newAccessToken);
-
-  return {
-    accessToken: newAccessToken,
-    refreshToken: newRefreshToken,
-    expiresIn: 24 * 60 * 60,
-    type: "Bearer",
-  };
+  return createTokenPair(user, ["*"]);
 };
 
 export { createUser, login, refresh };

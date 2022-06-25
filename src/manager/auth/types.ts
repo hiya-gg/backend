@@ -7,9 +7,8 @@ interface TokenPayload {
     };
     scopes?: string[];
   };
-  refresh?: {
-    access: string;
-  };
+
+  pairId: string;
   type: "access" | "refresh";
 }
 

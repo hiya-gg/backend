@@ -20,8 +20,7 @@ import { Controller, POST } from "fastify-decorators";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { Static, Type } from "@sinclair/typebox";
 import {
-  createAccessToken,
-  createRefreshToken,
+  createTokenPair,
   createUser,
   login,
   refresh,
@@ -73,13 +72,11 @@ export default class AccountsController {
     const { email, username, password } = request.body;
     const user = await createUser(email, username, password);
 
-    const accessToken = createAccessToken(user, ["*"]);
-    const refreshToken = createRefreshToken(user, accessToken);
-
+    const pair = createTokenPair(user, ["*"]);
     return AccountsController.sendLoginResponse(
       reply,
-      accessToken,
-      refreshToken
+      pair.accessToken,
+      pair.refreshToken
     );
   }
 

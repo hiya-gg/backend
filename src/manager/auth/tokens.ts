@@ -6,7 +6,8 @@ import {
   SignerOptions,
   VerifierOptions,
 } from "fast-jwt";
-import { TokenPayload } from "./types";
+import { randomUUID } from "crypto";
+import { TokenPayload, TokenResponse } from "./types";
 import config from "../../config";
 
 const SIGN_OPTIONS: Partial<SignerOptions> = {
@@ -32,7 +33,7 @@ const jwtVerify = (token: string, options?: Partial<VerifierOptions>) =>
 
 const jwtDecode = (token: string): TokenPayload => decode(token);
 
-const createAccessToken = (user: User, scopes: string[]) =>
+const createAccessToken = (pairId: string, user: User, scopes: string[]) =>
   jwtSign({
     access: {
       user: {
@@ -42,10 +43,11 @@ const createAccessToken = (user: User, scopes: string[]) =>
       },
       scopes,
     },
+    pairId,
     type: "access",
   });
 
-const createRefreshToken = (user: User, accessToken: string) =>
+const createRefreshToken = (pairId: string, user: User) =>
   jwtSign(
     {
       user: {
@@ -53,9 +55,7 @@ const createRefreshToken = (user: User, accessToken: string) =>
         email: user.email,
         username: user.username,
       },
-      refresh: {
-        access: accessToken,
-      },
+      pairId,
       type: "refresh",
     } as TokenPayload,
     {
@@ -76,34 +76,39 @@ const validateAccessToken = (token: string): TokenPayload => {
   return payload;
 };
 
+const createTokenPair = (user: User, scopes: string[]): TokenResponse => {
+  const pairId = randomUUID();
+  const accessToken = createAccessToken(pairId, user, scopes);
+  const refreshToken = createRefreshToken(pairId, user);
+
+  return {
+    accessToken,
+    refreshToken,
+    expiresIn: 24 * 60 * 60,
+    type: "Bearer",
+  };
+};
+
 const validateRefreshToken = (
   accessToken: string,
   refreshToken: string
-): boolean => {
-  const refreshPayload = jwtVerify(refreshToken);
-  if (!refreshPayload) {
+): TokenPayload => {
+  const refreshPayload: TokenPayload = jwtVerify(refreshToken);
+  if (!refreshPayload || refreshPayload.type !== "refresh") {
     throw new Error("Invalid token");
   }
 
-  if (refreshPayload.type !== "refresh") {
-    return false;
-  }
+  const accessPayload: TokenPayload = jwtVerify(accessToken, {
+    ignoreExpiration: true,
+  });
 
-  if (refreshPayload.refresh.access !== accessToken) {
-    return false;
-  }
-
-  const accessPayload = jwtVerify(accessToken, { ignoreExpiration: true });
-  if (!accessPayload) {
+  if (
+    !accessPayload ||
+    refreshPayload.pairId !== accessPayload.pairId ||
+    accessPayload.type !== "access" ||
+    accessPayload.access?.user.id !== refreshPayload.access?.user.id
+  ) {
     throw new Error("Invalid token");
-  }
-
-  if (accessPayload.type !== "access") {
-    return false;
-  }
-
-  if (accessPayload.user.id !== refreshPayload.user.id) {
-    return false;
   }
 
   return accessPayload;
@@ -114,6 +119,7 @@ export {
   VERIFY_OPTIONS,
   createAccessToken,
   createRefreshToken,
+  createTokenPair,
   validateAccessToken,
   validateRefreshToken,
   jwtDecode,
