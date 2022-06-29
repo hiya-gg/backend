@@ -17,10 +17,12 @@
  */
 
 import { start as startServer } from "./server";
-import { connect, disconnect } from "./database";
+import { connect as connectDB, disconnect as disconnectDB } from "./database";
+import { connect as connectRedis, disconnect as disconnectRedis } from "./redis";
 
 const start = async () => {
-  await connect();
+  await connectDB();
+  await connectRedis();
   await startServer();
 };
 
@@ -30,4 +32,7 @@ start()
     // Rethrow the error
     throw e;
   })
-  .finally(() => disconnect());
+  .finally(async () => {
+    await disconnectRedis();
+    await disconnectDB();
+  });

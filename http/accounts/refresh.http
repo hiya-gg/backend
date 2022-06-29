@@ -1,0 +1,7 @@
+POST {{host}}/accounts/refresh
+Content-Type: application/json
+
+{
+  "accessToken": "{{accessToken}}",
+  "refreshToken": "{{refreshToken}}"
+}

@@ -1,15 +1,25 @@
 interface TokenPayload {
   access?: {
     user: {
-      id: number;
-      email: string;
+      id: string;
       username: string;
     };
     scopes?: string[];
   };
 
+  refresh?: {
+    user?: {
+      id: string;
+    };
+  };
+
   pairId: string;
   type: "access" | "refresh";
+
+  // JWT elements - only present after creation
+  iss?: string; // Issuer
+  iat?: number; // Issued at
+  exp?: number; // Expiration
 }
 
 interface TokenResponse {

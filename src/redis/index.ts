@@ -16,13 +16,4 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { AuthorizationCode } from "simple-oauth2";
-import { ServiceMetadata } from "./types";
-import DISCORD_SERVICE from "./service/discord";
-import GITHUB_SERVICE from "./service/github";
-
-const services: ServiceMetadata[] = [DISCORD_SERVICE, GITHUB_SERVICE];
-
-const createClient = (service: ServiceMetadata) => new AuthorizationCode(service.config);
-
-export { DISCORD_SERVICE, services, createClient };
+export * from "./redis";

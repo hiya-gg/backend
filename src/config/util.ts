@@ -16,13 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { AuthorizationCode } from "simple-oauth2";
-import { ServiceMetadata } from "./types";
-import DISCORD_SERVICE from "./service/discord";
-import GITHUB_SERVICE from "./service/github";
+const optInt = (value: string | undefined) => {
+  if (!value) return undefined;
+  return parseInt(value, 10);
+};
 
-const services: ServiceMetadata[] = [DISCORD_SERVICE, GITHUB_SERVICE];
-
-const createClient = (service: ServiceMetadata) => new AuthorizationCode(service.config);
-
-export { DISCORD_SERVICE, services, createClient };
+// eslint-disable-next-line import/prefer-default-export
+export { optInt };

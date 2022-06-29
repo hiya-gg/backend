@@ -1,0 +1,2 @@
+GET {{host}}/oauth/discord/callback?code=random
+Authorization: Bearer {{accessToken}}

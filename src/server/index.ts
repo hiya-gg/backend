@@ -24,7 +24,7 @@ import * as process from "process";
 import fastifyJwt from "@fastify/jwt";
 import fastifyCookie from "@fastify/cookie";
 import fastifyAuth from "@fastify/auth";
-import config from "../config";
+import { app } from "../config";
 import { hiyaFastifyAuth, SIGN_OPTIONS, VERIFY_OPTIONS } from "../manager/auth";
 
 // Configure fastify
@@ -63,7 +63,7 @@ fastify.register(fastifyAuth);
 
 // Configure authentication
 fastify.register(fastifyJwt, {
-  secret: config.app.jwt.secret,
+  secret: app.jwt.secret,
   sign: SIGN_OPTIONS,
   verify: VERIFY_OPTIONS,
   cookie: {
@@ -73,7 +73,7 @@ fastify.register(fastifyJwt, {
 });
 
 fastify.register(fastifyCookie, {
-  secret: config.app.jwt.secret,
+  secret: app.jwt.secret,
 });
 
 // Configure route resolving
@@ -86,11 +86,17 @@ fastify.register(bootstrap, {
 fastify.register(hiyaFastifyAuth);
 
 // Set error handling
-fastify.setErrorHandler(async (error) => ({
-  success: false,
-  error: error.message,
-  code: error.statusCode ?? 400,
-}));
+fastify.setErrorHandler(async (error) => {
+  if (process.env.NODE_ENV === "development") {
+    fastify.log.error(error);
+  }
+
+  return {
+    success: false,
+    error: error.message,
+    code: error.statusCode ?? 400,
+  };
+});
 fastify.setNotFoundHandler(async (request) => {
   const url = new URL(request.url, `${request.protocol}://${request.hostname}`);
   return {
@@ -102,8 +108,8 @@ fastify.setNotFoundHandler(async (request) => {
 const start = async () => {
   try {
     await fastify.listen({
-      host: config.app.fastify.host,
-      port: config.app.fastify.port,
+      host: app.fastify.host,
+      port: app.fastify.port,
     });
   } catch (err) {
     fastify.log.error(err);

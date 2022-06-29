@@ -108,9 +108,7 @@ export default class OauthController {
     }
 
     try {
-      const connection = await service.connectionBuilder(
-        token.token.access_token
-      );
+      const connection = await service.connectionBuilder(token.token.access_token);
 
       await prisma.connection.upsert({
         create: {

@@ -37,9 +37,7 @@ const DISCORD_SERVICE: ServiceMetadata = {
     },
   },
   connectionBuilder: async (token: string) => {
-    const { id, username, discriminator }: DiscordUser = await centra(
-      "https://discord.com/api/v10/users/@me"
-    )
+    const { id, username, discriminator }: DiscordUser = await centra("https://discord.com/api/v10/users/@me")
       .header("Authorization", `Bearer ${token}`)
       .send()
       .then((res) => res.json());

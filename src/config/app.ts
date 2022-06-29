@@ -16,10 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-const optInt = (value: string | undefined) => {
-  if (!value) return undefined;
-  return parseInt(value, 10);
-};
+import { optInt } from "./util";
 
 export default {
   fastify: {

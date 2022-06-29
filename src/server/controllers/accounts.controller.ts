@@ -19,13 +19,7 @@
 import { Controller, POST } from "fastify-decorators";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { Static, Type } from "@sinclair/typebox";
-import {
-  createTokenPair,
-  createUser,
-  login,
-  refresh,
-  TokenResponse,
-} from "../../manager/auth";
+import { createTokenPair, createUser, login, refresh, TokenResponse } from "../../manager/auth";
 import { fastify } from "../index";
 
 const CreateUserBody = Type.Object({
@@ -73,11 +67,7 @@ export default class AccountsController {
     const user = await createUser(email, username, password);
 
     const pair = createTokenPair(user, ["*"]);
-    return AccountsController.sendLoginResponse(
-      reply,
-      pair.accessToken,
-      pair.refreshToken
-    );
+    return AccountsController.sendLoginResponse(reply, pair.accessToken, pair.refreshToken);
   }
 
   @POST({
@@ -97,17 +87,11 @@ export default class AccountsController {
     const { email, username, password } = request.body;
 
     if (!email && !username) {
-      return fastify.httpErrors.badRequest(
-        "Must provide either email or username"
-      );
+      return fastify.httpErrors.badRequest("Must provide either email or username");
     }
 
     const token = await login((email || username) as string, password);
-    return AccountsController.sendLoginResponse(
-      reply,
-      token.accessToken,
-      token.refreshToken
-    );
+    return AccountsController.sendLoginResponse(reply, token.accessToken, token.refreshToken);
   }
 
   @POST({
@@ -126,13 +110,10 @@ export default class AccountsController {
   ) {
     const { accessToken, refreshToken } = request.body;
     const token = await refresh(accessToken, refreshToken);
-    return AccountsController.sendLoginResponse(
-      reply,
-      token.accessToken,
-      token.refreshToken
-    );
+    return AccountsController.sendLoginResponse(reply, token.accessToken, token.refreshToken);
   }
 
+  // noinspection JSUnusedLocalSymbols
   @POST({
     url: "/invalidate",
     options: {
@@ -151,11 +132,7 @@ export default class AccountsController {
     return { success: true };
   }
 
-  private static sendLoginResponse(
-    reply: FastifyReply,
-    accessToken: string,
-    refreshToken: string
-  ) {
+  private static sendLoginResponse(reply: FastifyReply, accessToken: string, refreshToken: string) {
     return reply
       .setCookie("token", JSON.stringify(accessToken), {
         httpOnly: true,

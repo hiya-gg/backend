@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyRequest } from "fastify";
 import fp from "fastify-plugin";
 import { validateAccessToken } from "./tokens";
 import { TokenPayload } from "./types";
+import { isInvalidated } from "./accounts";
 
 const getAccessToken = (request: FastifyRequest) => {
   if (request.headers.authorization) {
@@ -25,40 +26,44 @@ const getAccessToken = (request: FastifyRequest) => {
   return null;
 };
 
-const verifyScopes =
-  (scopes: string[] | undefined) => async (request: FastifyRequest) => {
-    const accessToken = getAccessToken(request);
-    if (!accessToken) {
-      throw new Error("No access token");
-    }
+const verifyScopes = (scopes: string[] | undefined) => async (request: FastifyRequest) => {
+  const accessToken = getAccessToken(request);
+  if (!accessToken) {
+    throw new Error("No access token");
+  }
 
-    const token = validateAccessToken(accessToken);
-    if (!scopes) {
-      return;
-    }
+  const token = validateAccessToken(accessToken);
+  if (!scopes) {
+    return;
+  }
 
-    const userScopes = token?.access?.scopes ?? [];
-    if (!userScopes.length) {
-      throw new Error("Invalid scopes");
-    }
+  const userScopes = token?.access?.scopes ?? [];
+  if (!userScopes.length) {
+    throw new Error("Invalid scopes");
+  }
 
-    if (userScopes.includes("*")) {
-      return;
-    }
+  if (userScopes.includes("*")) {
+    return;
+  }
 
-    const missingScopes = scopes.filter((scope) => !userScopes.includes(scope));
-    if (missingScopes.length) {
-      throw new Error(`Missing scopes: ${missingScopes.join(", ")}`);
-    }
-  };
+  const missingScopes = scopes.filter((scope) => !userScopes.includes(scope));
+  if (missingScopes.length) {
+    throw new Error(`Missing scopes: ${missingScopes.join(", ")}`);
+  }
+};
 
-const getSession = (request: FastifyRequest): TokenPayload | undefined => {
+const getSession = async (request: FastifyRequest): Promise<TokenPayload | undefined> => {
   const accessToken = getAccessToken(request);
   if (!accessToken) {
     return undefined;
   }
 
-  return validateAccessToken(accessToken);
+  const token = validateAccessToken(accessToken);
+  if (await isInvalidated(accessToken)) {
+    return undefined;
+  }
+
+  return token;
 };
 
 const hiyaFastifyAuth = fp(

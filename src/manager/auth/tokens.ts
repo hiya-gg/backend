@@ -1,14 +1,8 @@
 import { User } from "@prisma/client";
-import {
-  createDecoder,
-  createSigner,
-  createVerifier,
-  SignerOptions,
-  VerifierOptions,
-} from "fast-jwt";
-import { randomUUID } from "crypto";
+import { createDecoder, createSigner, createVerifier, SignerOptions, VerifierOptions } from "fast-jwt";
+import { Snowflake } from "nodejs-snowflake";
 import { TokenPayload, TokenResponse } from "./types";
-import config from "../../config";
+import { app } from "../../config";
 
 const SIGN_OPTIONS: Partial<SignerOptions> = {
   iss: "api.hiya.gg",
@@ -21,15 +15,16 @@ const VERIFY_OPTIONS: Partial<VerifierOptions> = {
 
 const decode = createDecoder();
 
-const jwtSign = (payload: TokenPayload, options?: Partial<SignerOptions>) =>
-  createSigner({ ...SIGN_OPTIONS, ...options, key: config.app.jwt.secret })(
-    payload
-  );
+const SNOWFLAKE_EPOCH = new Date(2022, 0, 1).getTime();
+const snowflake = new Snowflake({
+  custom_epoch: SNOWFLAKE_EPOCH,
+});
 
-const jwtVerify = (token: string, options?: Partial<VerifierOptions>) =>
-  createVerifier({ ...VERIFY_OPTIONS, ...options, key: config.app.jwt.secret })(
-    token
-  );
+const jwtSign = (payload: TokenPayload, options?: Partial<SignerOptions>) =>
+  createSigner({ ...SIGN_OPTIONS, ...options, key: app.jwt.secret })(payload);
+
+const jwtVerify = (token: string, options?: Partial<VerifierOptions>): TokenPayload =>
+  createVerifier({ ...VERIFY_OPTIONS, ...options, key: app.jwt.secret })(token);
 
 const jwtDecode = (token: string): TokenPayload => decode(token);
 
@@ -38,7 +33,6 @@ const createAccessToken = (pairId: string, user: User, scopes: string[]) =>
     access: {
       user: {
         id: user.id,
-        email: user.email,
         username: user.username,
       },
       scopes,
@@ -50,16 +44,16 @@ const createAccessToken = (pairId: string, user: User, scopes: string[]) =>
 const createRefreshToken = (pairId: string, user: User) =>
   jwtSign(
     {
-      user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
+      refresh: {
+        user: {
+          id: user.id,
+        },
       },
       pairId,
       type: "refresh",
     } as TokenPayload,
     {
-      expiresIn: 14 * 24 * 60 * 60 * 1000,
+      expiresIn: 7 * 24 * 60 * 60 * 1000,
     }
   );
 
@@ -77,7 +71,7 @@ const validateAccessToken = (token: string): TokenPayload => {
 };
 
 const createTokenPair = (user: User, scopes: string[]): TokenResponse => {
-  const pairId = randomUUID();
+  const pairId = snowflake.getUniqueID().toString();
   const accessToken = createAccessToken(pairId, user, scopes);
   const refreshToken = createRefreshToken(pairId, user);
 
@@ -89,10 +83,7 @@ const createTokenPair = (user: User, scopes: string[]): TokenResponse => {
   };
 };
 
-const validateRefreshToken = (
-  accessToken: string,
-  refreshToken: string
-): TokenPayload => {
+const validateRefreshToken = (accessToken: string, refreshToken: string): TokenPayload => {
   const refreshPayload: TokenPayload = jwtVerify(refreshToken);
   if (!refreshPayload || refreshPayload.type !== "refresh") {
     throw new Error("Invalid token");
@@ -106,7 +97,7 @@ const validateRefreshToken = (
     !accessPayload ||
     refreshPayload.pairId !== accessPayload.pairId ||
     accessPayload.type !== "access" ||
-    accessPayload.access?.user.id !== refreshPayload.access?.user.id
+    accessPayload.access?.user.id !== refreshPayload.refresh?.user?.id
   ) {
     throw new Error("Invalid token");
   }
@@ -123,4 +114,6 @@ export {
   validateAccessToken,
   validateRefreshToken,
   jwtDecode,
+  jwtVerify,
+  snowflake,
 };

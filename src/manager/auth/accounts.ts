@@ -20,14 +20,11 @@ import argon2 from "argon2";
 import { Prisma } from "@prisma/client";
 import * as emailValidator from "email-validator";
 import { prisma } from "../../database";
-import { createTokenPair, jwtDecode, validateRefreshToken } from "./tokens";
+import { createTokenPair, jwtDecode, jwtVerify, snowflake, validateRefreshToken } from "./tokens";
 import { TokenResponse } from "./types";
+import { redis } from "../../redis";
 
-const createUser = async (
-  email: string,
-  username: string,
-  password: string
-) => {
+const createUser = async (email: string, username: string, password: string) => {
   if (!emailValidator.validate(email)) {
     throw new Error("Invalid email");
   }
@@ -37,6 +34,7 @@ const createUser = async (
   try {
     return await prisma.user.create({
       data: {
+        id: snowflake.getUniqueID().toString(),
         email,
         username,
         password: passwordHash,
@@ -53,10 +51,7 @@ const createUser = async (
   }
 };
 
-const login = async (
-  usernameOrEmail: string,
-  password: string
-): Promise<TokenResponse> => {
+const login = async (usernameOrEmail: string, password: string): Promise<TokenResponse> => {
   const user = await prisma.user.findFirst({
     where: {
       OR: [
@@ -87,10 +82,32 @@ const login = async (
   return createTokenPair(user, ["*"]);
 };
 
-const refresh = async (
-  accessToken: string,
-  refreshToken: string
-): Promise<TokenResponse> => {
+const invalidate = async (token: string) => {
+  const verify = await jwtVerify(token);
+  const userId = verify.type === "access" ? verify.access?.user.id : verify.refresh?.user?.id;
+
+  if (!userId) {
+    throw new Error("Invalid token");
+  }
+
+  await redis.sAdd(`invalid:${userId}`, verify.pairId);
+};
+
+const isInvalidated = async (token: string) => {
+  const decoded = await jwtDecode(token);
+  const userId = decoded.type === "access" ? decoded.access?.user.id : decoded.refresh?.user?.id;
+
+  if (decoded.exp && decoded.exp < Date.now() / 1000) {
+    // Since this is already invalidated, we can return true
+    // and not block for the removal operation.
+    redis.sRem(`invalid:${userId}`, decoded.pairId).then();
+    return true;
+  }
+
+  return redis.sIsMember(`invalid:${userId}`, decoded.pairId);
+};
+
+const refresh = async (accessToken: string, refreshToken: string): Promise<TokenResponse> => {
   if (!validateRefreshToken(accessToken, refreshToken)) {
     throw new Error("Invalid refresh token");
   }
@@ -110,8 +127,8 @@ const refresh = async (
     throw new Error("Invalid refresh token");
   }
 
-  // TODO: Invalidate access token & refresh token
+  await invalidate(accessToken);
   return createTokenPair(user, ["*"]);
 };
 
-export { createUser, login, refresh };
+export { createUser, login, refresh, invalidate, isInvalidated };
