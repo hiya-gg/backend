@@ -16,4 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./redis";
+interface ConnectiveBinding {
+  connect: () => Promise<void>;
+  disconnect: () => Promise<void>;
+}
+
+// eslint-disable-next-line import/prefer-default-export
+export { ConnectiveBinding };

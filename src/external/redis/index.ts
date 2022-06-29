@@ -16,6 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Server from "./server";
+import RedisConnection from "./redis";
 
-export default Server;
+export default RedisConnection;

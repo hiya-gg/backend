@@ -19,10 +19,11 @@
 import { Controller, GET } from "fastify-decorators";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { Static, Type } from "@sinclair/typebox";
+import { container } from "tsyringe";
 import { createClient, services } from "../../manager/linking";
 import { verifyScopes } from "../../manager/auth";
-import { prisma } from "../../database";
-import { fastify } from "../index";
+import Server from "../server";
+import { PrismaConnection } from "../../external";
 
 const OAuthParams = Type.Object({
   id: Type.String(),
@@ -33,6 +34,8 @@ const OAuthCodeQuery = Type.Object({
   code: Type.String(),
 });
 type OAuthCodeQueryType = Static<typeof OAuthCodeQuery>;
+
+const { fastify } = container.resolve(Server);
 
 @Controller({ route: "/oauth" })
 export default class OauthController {
@@ -54,7 +57,7 @@ export default class OauthController {
     const service = services.find((s) => s.name.toLowerCase() === id);
 
     if (!service) {
-      return fastify.httpErrors.notFound();
+      return container.resolve(Server).fastify.httpErrors.notFound();
     }
 
     // TODO: State
@@ -110,7 +113,7 @@ export default class OauthController {
     try {
       const connection = await service.connectionBuilder(token.token.access_token);
 
-      await prisma.connection.upsert({
+      await container.resolve(PrismaConnection).connection.upsert({
         create: {
           user: {
             connect: {

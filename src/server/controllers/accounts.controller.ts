@@ -19,8 +19,9 @@
 import { Controller, POST } from "fastify-decorators";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { Static, Type } from "@sinclair/typebox";
-import { createTokenPair, createUser, login, refresh, TokenResponse } from "../../manager/auth";
-import { fastify } from "../index";
+import { container } from "tsyringe";
+import { createTokenPair, createUser, invalidate, login, refresh, TokenResponse } from "../../manager/auth";
+import Server from "../server";
 
 const CreateUserBody = Type.Object({
   email: Type.String(),
@@ -43,7 +44,8 @@ const RefreshBody = Type.Object({
 type RefreshBodyType = Static<typeof RefreshBody>;
 
 const InvalidateBody = Type.Object({
-  accessToken: Type.String(),
+  // Accepts either an access token or a refresh token
+  token: Type.String(),
 });
 type InvalidateBodyType = Static<typeof InvalidateBody>;
 
@@ -87,7 +89,7 @@ export default class AccountsController {
     const { email, username, password } = request.body;
 
     if (!email && !username) {
-      return fastify.httpErrors.badRequest("Must provide either email or username");
+      return container.resolve(Server).fastify.httpErrors.badRequest("Must provide either email or username");
     }
 
     const token = await login((email || username) as string, password);
@@ -128,8 +130,7 @@ export default class AccountsController {
       Body: InvalidateBodyType;
     }>
   ) {
-    // TODO: Implement
-    return { success: true };
+    return { success: await invalidate(request.body.token) };
   }
 
   private static sendLoginResponse(reply: FastifyReply, accessToken: string, refreshToken: string) {

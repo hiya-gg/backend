@@ -19,10 +19,10 @@
 import argon2 from "argon2";
 import { Prisma } from "@prisma/client";
 import * as emailValidator from "email-validator";
-import { prisma } from "../../database";
+import { container } from "tsyringe";
 import { createTokenPair, jwtDecode, jwtVerify, snowflake, validateRefreshToken } from "./tokens";
 import { TokenResponse } from "./types";
-import { redis } from "../../redis";
+import { PrismaConnection, RedisConnection } from "../../external";
 
 const createUser = async (email: string, username: string, password: string) => {
   if (!emailValidator.validate(email)) {
@@ -32,7 +32,7 @@ const createUser = async (email: string, username: string, password: string) => 
   const passwordHash = await argon2.hash(password);
 
   try {
-    return await prisma.user.create({
+    return await container.resolve(PrismaConnection).user.create({
       data: {
         id: snowflake.getUniqueID().toString(),
         email,
@@ -52,7 +52,7 @@ const createUser = async (email: string, username: string, password: string) => 
 };
 
 const login = async (usernameOrEmail: string, password: string): Promise<TokenResponse> => {
-  const user = await prisma.user.findFirst({
+  const user = await container.resolve(PrismaConnection).user.findFirst({
     where: {
       OR: [
         {
@@ -82,7 +82,12 @@ const login = async (usernameOrEmail: string, password: string): Promise<TokenRe
   return createTokenPair(user, ["*"]);
 };
 
-const invalidate = async (token: string) => {
+/**
+ * Invalidates a token pair.
+ * @param token The token to invalidate.
+ * @returns Whether the token was invalidated.
+ */
+const invalidate = async (token: string): Promise<boolean> => {
   const verify = await jwtVerify(token);
   const userId = verify.type === "access" ? verify.access?.user.id : verify.refresh?.user?.id;
 
@@ -90,13 +95,15 @@ const invalidate = async (token: string) => {
     throw new Error("Invalid token");
   }
 
-  await redis.sAdd(`invalid:${userId}`, verify.pairId);
+  const rows = await container.resolve(RedisConnection).redis.sAdd(`invalid:${userId}`, verify.pairId);
+  return rows === 1;
 };
 
 const isInvalidated = async (token: string) => {
   const decoded = await jwtDecode(token);
   const userId = decoded.type === "access" ? decoded.access?.user.id : decoded.refresh?.user?.id;
 
+  const { redis } = container.resolve(RedisConnection);
   if (decoded.exp && decoded.exp < Date.now() / 1000) {
     // Since this is already invalidated, we can return true
     // and not block for the removal operation.
@@ -117,7 +124,11 @@ const refresh = async (accessToken: string, refreshToken: string): Promise<Token
     throw new Error("Invalid refresh token");
   }
 
-  const user = await prisma.user.findFirst({
+  if ((await isInvalidated(accessToken)) || (await isInvalidated(refreshToken))) {
+    throw new Error("Invalid token pair");
+  }
+
+  const user = await container.resolve(PrismaConnection).user.findFirst({
     where: {
       id: decoded?.access?.user?.id,
     },

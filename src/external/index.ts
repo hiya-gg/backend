@@ -16,4 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./database";
+import RedisConnection from "./redis";
+import PrismaConnection from "./database";
+
+export { RedisConnection, PrismaConnection };

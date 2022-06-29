@@ -16,23 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { start as startServer } from "./server";
-import { connect as connectDB, disconnect as disconnectDB } from "./database";
-import { connect as connectRedis, disconnect as disconnectRedis } from "./redis";
+import "reflect-metadata";
 
-const start = async () => {
-  await connectDB();
-  await connectRedis();
-  await startServer();
-};
+import { container } from "tsyringe";
+import { PrismaConnection, RedisConnection } from "./external";
+import Server from "./server";
 
-// Start the server
-start()
-  .catch((e) => {
-    // Rethrow the error
-    throw e;
-  })
-  .finally(async () => {
-    await disconnectRedis();
-    await disconnectDB();
-  });
+await container.resolve(PrismaConnection).connect();
+await container.resolve(RedisConnection).connect();
+await container.resolve(Server).start();

@@ -16,6 +16,34 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Server from "./server";
+import { injectable, singleton } from "tsyringe";
+import { PrismaClient } from "@prisma/client";
+import { ConnectiveBinding } from "../binding";
 
-export default Server;
+@singleton()
+@injectable()
+class PrismaConnection implements ConnectiveBinding {
+  private readonly prisma: PrismaClient;
+
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
+
+  async connect(): Promise<void> {
+    await this.prisma.$connect();
+  }
+
+  async disconnect(): Promise<void> {
+    await this.prisma.$disconnect();
+  }
+
+  get user() {
+    return this.prisma.user;
+  }
+
+  get connection() {
+    return this.prisma.connection;
+  }
+}
+
+export default PrismaConnection;

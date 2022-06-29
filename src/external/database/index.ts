@@ -16,11 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { PrismaClient } from "@prisma/client";
+import PrismaConnection from "./database";
 
-const prisma = new PrismaClient();
-
-const connect = async () => prisma.$connect();
-const disconnect = async () => prisma.$disconnect();
-
-export { prisma, connect, disconnect };
+export default PrismaConnection;

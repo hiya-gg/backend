@@ -26,15 +26,28 @@ const getAccessToken = (request: FastifyRequest) => {
   return null;
 };
 
-const verifyScopes = (scopes: string[] | undefined) => async (request: FastifyRequest) => {
+const getSession = async (request: FastifyRequest): Promise<TokenPayload | undefined> => {
   const accessToken = getAccessToken(request);
   if (!accessToken) {
-    throw new Error("No access token");
+    return undefined;
   }
 
   const token = validateAccessToken(accessToken);
+  if (await isInvalidated(accessToken)) {
+    return undefined;
+  }
+
+  return token;
+};
+
+const verifyScopes = (scopes: string[] | undefined) => async (request: FastifyRequest) => {
   if (!scopes) {
     return;
+  }
+
+  const token = await getSession(request);
+  if (!token) {
+    throw new Error("Unauthorized");
   }
 
   const userScopes = token?.access?.scopes ?? [];
@@ -50,20 +63,6 @@ const verifyScopes = (scopes: string[] | undefined) => async (request: FastifyRe
   if (missingScopes.length) {
     throw new Error(`Missing scopes: ${missingScopes.join(", ")}`);
   }
-};
-
-const getSession = async (request: FastifyRequest): Promise<TokenPayload | undefined> => {
-  const accessToken = getAccessToken(request);
-  if (!accessToken) {
-    return undefined;
-  }
-
-  const token = validateAccessToken(accessToken);
-  if (await isInvalidated(accessToken)) {
-    return undefined;
-  }
-
-  return token;
 };
 
 const hiyaFastifyAuth = fp(
