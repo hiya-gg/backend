@@ -32,7 +32,7 @@ const createUser = async (email: string, username: string, password: string) => 
   const passwordHash = await argon2.hash(password);
 
   try {
-    return await container.resolve(PrismaConnection).user.create({
+    return container.resolve(PrismaConnection).user.create({
       data: {
         id: snowflake.getUniqueID().toString(),
         email,
