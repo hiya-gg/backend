@@ -22,6 +22,5 @@ import { container } from "tsyringe";
 import { PrismaConnection, RedisConnection } from "./external";
 import Server from "./server";
 
-await container.resolve(PrismaConnection).connect();
-await container.resolve(RedisConnection).connect();
+await Promise.all([container.resolve(PrismaConnection).connect(), container.resolve(RedisConnection).connect()]);
 await container.resolve(Server).start();
