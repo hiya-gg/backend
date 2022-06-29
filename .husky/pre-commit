@@ -19,5 +19,5 @@
 
 . "$(dirname "$0")/_/husky.sh"
 
-cd "$(dirname "$0")" || exit
+cd "$(dirname "$0")/.." || exit
 npx lint-staged
