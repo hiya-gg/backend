@@ -69,18 +69,6 @@ class Server {
   }
 
   private configurePlugins() {
-    // this.fastify.register(fastifySwagger, {
-    //   routePrefix: "/swagger",
-    //   exposeRoute: true,
-    //   swagger: {
-    //     info: {
-    //       title: "HiyaGG API",
-    //       description: "API for HiyaGG",
-    //       version: "1.0.0",
-    //     },
-    //   },
-    // });
-
     this.fastify.register(fastifySensible);
     this.fastify.register(fastifyAuth);
     this.fastify.register(hiyaFastifyAuth);
