@@ -1,0 +1,14 @@
+.github
+.husky
+.idea
+docker
+http
+node_modules
+.env
+.env.template
+.eslintrc.json
+.gitignore
+.prettierrc.json
+Dockerfile
+LICENSE
+README.md

@@ -7,6 +7,8 @@
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "declarationDir": "./build/types",
     "typeRoots": [
       "src/types",
       "node_modules/@types"

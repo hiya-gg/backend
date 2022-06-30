@@ -1,6 +1,17 @@
 version: "3"
 
 services:
+  backend:
+    build: ../
+    env_file: ../.env
+    container_name: backend-api
+    ports:
+      - "3000:3000"
+    links:
+      - postgres
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres?schema=public
+
   postgres:
     container_name: backend-postgres
     image: postgres:14.3
