@@ -7,8 +7,9 @@ services:
     container_name: backend-api
     ports:
       - "3000:3000"
-    links:
+    depends_on:
       - postgres
+      - redis
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres?schema=public
 

@@ -19,9 +19,10 @@
 import argon2 from "argon2";
 import * as emailValidator from "email-validator";
 import { container } from "tsyringe";
+import { Prisma } from "@prisma/client";
 import { createTokenPair, jwtDecode, jwtVerify, snowflake, validateRefreshToken } from "./tokens";
 import { TokenResponse } from "./types";
-import { Prisma, PrismaConnection, RedisConnection } from "../../external";
+import { PrismaConnection, RedisConnection } from "../../external";
 
 const createUser = async (email: string, username: string, password: string) => {
   if (!emailValidator.validate(email)) {
@@ -40,7 +41,7 @@ const createUser = async (email: string, username: string, password: string) => 
       },
     });
   } catch (e) {
-    if (e instanceof Prisma.Prisma.PrismaClientKnownRequestError) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === "P2002") {
         throw new Error("User already exists");
       }
