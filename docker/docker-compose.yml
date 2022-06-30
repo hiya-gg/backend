@@ -12,6 +12,8 @@ services:
       - redis
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres?schema=public
+      - REDIS_URI=redis://redis:6379
+      - NODE_ENV=production
 
   postgres:
     container_name: backend-postgres

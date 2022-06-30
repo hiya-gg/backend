@@ -33,6 +33,7 @@ class Server {
 
   constructor() {
     this.fastify = Fastify({
+      disableRequestLogging: process.env.NODE_ENV === "production",
       logger: {
         transport: {
           target: "pino-pretty",
